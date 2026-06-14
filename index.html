@@ -1,0 +1,1229 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Our Little World 💕</title>
+<link href="https://fonts.googleapis.com/css2?family=Dancing+Script:wght@400;600;700&family=Quicksand:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --pink-light: #FFD6E5;
+  --pink-mid: #FFC7D9;
+  --pink-pale: #FFE5EE;
+  --pink-accent: #D63384;
+  --pink-soft: #F8C8D8;
+  --white: #FFFFFF;
+  --text-main: #5A5A5A;
+  --text-muted: #8A8A8A;
+  --shadow: rgba(214,51,132,0.12);
+  --shadow-hover: rgba(214,51,132,0.22);
+  --radius-card: 22px;
+  --radius-btn: 999px;
+}
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: 'Quicksand', sans-serif;
+  color: var(--text-main);
+  background: linear-gradient(135deg, #FFD6E5 0%, #FFE5EE 40%, #FFC7D9 80%, #FFD6E5 100%);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+.hearts-bg { position: fixed; inset: 0; pointer-events: none; z-index: 0; overflow: hidden; }
+.heart-float {
+  position: absolute; opacity: 0.12;
+  animation: floatUp linear infinite; color: var(--pink-accent);
+}
+@keyframes floatUp {
+  0% { transform: translateY(100vh) rotate(0deg); opacity: 0; }
+  10% { opacity: 0.14; }
+  90% { opacity: 0.1; }
+  100% { transform: translateY(-10vh) rotate(360deg); opacity: 0; }
+}
+
+/* LOCK */
+#lock-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(135deg, #FFD6E5, #FFE5EE, #FFC7D9);
+  flex-direction: column; padding: 24px;
+}
+.lock-card {
+  background: rgba(255,255,255,0.9); border-radius: var(--radius-card);
+  padding: 40px 36px; max-width: 380px; width: 100%;
+  box-shadow: 0 8px 32px var(--shadow); border: 1px solid rgba(214,51,132,0.12);
+  text-align: center; backdrop-filter: blur(10px);
+}
+.lock-card h1 { font-family: 'Dancing Script', cursive; font-size: 2.2rem; color: var(--pink-accent); margin-bottom: 6px; }
+.lock-card p { color: var(--text-muted); font-size: 0.92rem; margin-bottom: 28px; }
+.lock-input {
+  width: 100%; padding: 13px 20px; border-radius: var(--radius-btn);
+  border: 1.5px solid rgba(214,51,132,0.25); outline: none;
+  font-family: 'Quicksand', sans-serif; font-size: 1rem; color: var(--text-main);
+  background: var(--white); text-align: center; letter-spacing: 2px;
+  transition: border-color 0.2s; margin-bottom: 16px;
+}
+.lock-input:focus { border-color: var(--pink-accent); }
+.lock-btn {
+  width: 100%; padding: 13px; border-radius: var(--radius-btn);
+  border: none; background: var(--pink-accent); color: white;
+  font-family: 'Quicksand', sans-serif; font-size: 1rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.lock-btn:hover { background: #c02775; transform: translateY(-1px); box-shadow: 0 4px 16px var(--shadow-hover); }
+.lock-error { color: #e74c6b; font-size: 0.88rem; margin-top: 8px; display: none; }
+
+/* APP */
+#app { display: none; position: relative; z-index: 1; min-height: 100vh; padding-bottom: 80px; }
+.site-header { text-align: center; padding: 36px 20px 24px; }
+.site-header h1 { font-family: 'Dancing Script', cursive; font-size: clamp(1.8rem,5vw,3rem); color: var(--pink-accent); line-height: 1.2; margin-bottom: 6px; }
+.site-header .subtitle { color: var(--text-muted); font-size: 0.92rem; }
+
+/* COUNTER */
+.counter-card {
+  background: rgba(255,255,255,0.82); border-radius: var(--radius-card);
+  padding: 22px 20px; max-width: 640px; margin: 0 auto 24px;
+  box-shadow: 0 4px 20px var(--shadow); border: 1px solid rgba(214,51,132,0.14);
+  backdrop-filter: blur(8px); text-align: center;
+}
+.counter-label { font-family: 'Dancing Script', cursive; font-size: 1.2rem; color: var(--pink-accent); margin-bottom: 14px; }
+.counter-grid { display: flex; justify-content: center; gap: 6px; flex-wrap: wrap; align-items: flex-start; }
+.counter-item { text-align: center; min-width: 54px; }
+.counter-num { font-size: 1.7rem; font-weight: 600; color: var(--pink-accent); line-height: 1; }
+.counter-unit { font-size: 0.65rem; text-transform: uppercase; letter-spacing: 1px; color: var(--text-muted); margin-top: 2px; }
+.counter-dot { color: var(--pink-soft); font-size: 1.6rem; line-height: 1.7rem; }
+
+/* NAV */
+.nav-section { padding: 0 16px; max-width: 700px; margin: 0 auto 24px; }
+.nav-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(145px, 1fr)); gap: 10px; }
+.nav-btn {
+  background: var(--white); border: 1.5px solid rgba(214,51,132,0.15);
+  border-radius: var(--radius-btn); padding: 13px 16px;
+  font-family: 'Quicksand', sans-serif; font-size: 0.88rem; font-weight: 600;
+  color: var(--pink-accent); cursor: pointer; transition: all 0.22s;
+  display: flex; align-items: center; gap: 7px;
+  box-shadow: 0 2px 10px var(--shadow); white-space: nowrap;
+}
+.nav-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow-hover); background: var(--pink-pale); }
+.nav-btn.active { background: var(--pink-accent); color: white; border-color: var(--pink-accent); }
+
+/* QUICK CARDS */
+.quick-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 12px; padding: 0 16px; max-width: 700px; margin: 0 auto 24px; }
+.qcard {
+  background: rgba(255,255,255,0.84); border-radius: var(--radius-card);
+  padding: 16px 18px; box-shadow: 0 3px 14px var(--shadow);
+  border: 1px solid rgba(214,51,132,0.1); backdrop-filter: blur(6px);
+  cursor: pointer; transition: all 0.2s;
+}
+.qcard:hover { transform: translateY(-2px); box-shadow: 0 6px 20px var(--shadow-hover); }
+.qcard-title { font-family: 'Dancing Script', cursive; font-size: 1.1rem; color: var(--pink-accent); margin-bottom: 5px; }
+.qcard-content { font-size: 0.83rem; color: var(--text-main); line-height: 1.5; overflow: hidden; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.qcard-meta { font-size: 0.73rem; color: var(--text-muted); margin-top: 7px; }
+
+/* SECTION */
+.section-panel { display: none; padding: 0 16px; max-width: 700px; margin: 0 auto; animation: fadeSlide 0.3s ease; }
+.section-panel.active { display: block; }
+@keyframes fadeSlide { from { opacity:0; transform:translateY(12px); } to { opacity:1; transform:translateY(0); } }
+.panel-title { font-family: 'Dancing Script', cursive; font-size: 2rem; color: var(--pink-accent); text-align: center; margin-bottom: 20px; }
+
+/* CARDS */
+.card {
+  background: rgba(255,255,255,0.88); border-radius: var(--radius-card);
+  padding: 20px; box-shadow: 0 3px 16px var(--shadow);
+  border: 1px solid rgba(214,51,132,0.1); margin-bottom: 16px; backdrop-filter: blur(6px);
+}
+
+/* FORMS */
+.form-group { margin-bottom: 13px; }
+.form-label { display: block; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 4px; font-weight: 600; }
+.form-input, .form-textarea, .form-select {
+  width: 100%; padding: 10px 15px; border-radius: 14px;
+  border: 1.5px solid rgba(214,51,132,0.2); outline: none;
+  font-family: 'Quicksand', sans-serif; font-size: 0.9rem; color: var(--text-main);
+  background: rgba(255,255,255,0.9); transition: border-color 0.2s;
+}
+.form-input:focus, .form-textarea:focus, .form-select:focus { border-color: var(--pink-accent); }
+.form-textarea { resize: vertical; min-height: 80px; }
+
+.btn-primary {
+  background: var(--pink-accent); color: white; border: none;
+  padding: 11px 24px; border-radius: var(--radius-btn);
+  font-family: 'Quicksand', sans-serif; font-size: 0.9rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-primary:hover { background: #c02775; transform: translateY(-1px); }
+.btn-secondary {
+  background: var(--white); color: var(--pink-accent); border: 1.5px solid rgba(214,51,132,0.3);
+  padding: 8px 18px; border-radius: var(--radius-btn);
+  font-family: 'Quicksand', sans-serif; font-size: 0.84rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-secondary:hover { background: var(--pink-pale); }
+.btn-danger {
+  background: transparent; color: #e74c6b; border: 1px solid rgba(231,76,107,0.25);
+  padding: 5px 12px; border-radius: var(--radius-btn);
+  font-family: 'Quicksand', sans-serif; font-size: 0.76rem; cursor: pointer; transition: all 0.2s;
+}
+.btn-danger:hover { background: rgba(231,76,107,0.08); }
+.btn-sm { padding: 6px 14px; font-size: 0.78rem; }
+
+/* WHO */
+.who-toggle { display: flex; gap: 8px; margin-bottom: 14px; }
+.who-btn {
+  flex: 1; padding: 9px; border-radius: var(--radius-btn);
+  border: 1.5px solid rgba(214,51,132,0.25); background: var(--white);
+  color: var(--text-muted); cursor: pointer; font-family: 'Quicksand', sans-serif;
+  font-size: 0.86rem; font-weight: 600; transition: all 0.2s;
+}
+.who-btn.active { background: var(--pink-accent); color: white; border-color: var(--pink-accent); }
+
+/* TABS */
+.tabs { display: flex; gap: 6px; margin-bottom: 14px; overflow-x: auto; padding-bottom: 2px; }
+.tab-btn {
+  padding: 7px 15px; border-radius: var(--radius-btn);
+  border: 1.5px solid rgba(214,51,132,0.2); background: var(--white);
+  color: var(--text-muted); cursor: pointer; font-family: 'Quicksand', sans-serif;
+  font-size: 0.8rem; font-weight: 600; white-space: nowrap; transition: all 0.2s;
+}
+.tab-btn.active { background: var(--pink-accent); color: white; border-color: var(--pink-accent); }
+
+/* LETTER */
+.letter-item {
+  background: linear-gradient(135deg, rgba(255,255,255,0.95), rgba(255,232,240,0.6));
+  border: 1px solid rgba(214,51,132,0.15); border-radius: 18px;
+  padding: 22px; margin-bottom: 14px; box-shadow: 0 3px 14px var(--shadow);
+  position: relative; overflow: hidden;
+}
+.letter-item::before { content: '💌'; position: absolute; right: 14px; top: 10px; font-size: 1.3rem; opacity: 0.25; }
+.letter-author { font-family: 'Dancing Script', cursive; font-size: 1.1rem; color: var(--pink-accent); margin-bottom: 3px; }
+.letter-date { font-size: 0.73rem; color: var(--text-muted); margin-bottom: 11px; }
+.letter-text { font-size: 0.9rem; line-height: 1.7; color: var(--text-main); white-space: pre-wrap; }
+
+/* NOTE */
+.note-item {
+  background: linear-gradient(135deg, #fff9fc, #fff0f5);
+  border: 1px solid rgba(214,51,132,0.12); border-radius: 16px;
+  padding: 16px; margin-bottom: 12px; box-shadow: 0 2px 10px var(--shadow);
+}
+.note-author { font-size: 0.78rem; color: var(--pink-accent); font-weight: 600; }
+.note-date { font-size: 0.7rem; color: var(--text-muted); }
+.note-text { font-size: 0.88rem; line-height: 1.6; margin: 7px 0; color: var(--text-main); white-space: pre-wrap; }
+
+/* GALLERY */
+.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(130px, 1fr)); gap: 9px; margin-bottom: 14px; }
+.gallery-item { position: relative; border-radius: 13px; overflow: hidden; aspect-ratio: 1; cursor: pointer; box-shadow: 0 2px 10px var(--shadow); transition: transform 0.2s; }
+.gallery-item:hover { transform: scale(1.03); }
+.gallery-item img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.del-photo { position: absolute; top: 5px; right: 5px; background: rgba(255,255,255,0.9); border: none; border-radius: 50%; width: 24px; height: 24px; cursor: pointer; font-size: 12px; display: none; align-items: center; justify-content: center; }
+.gallery-item:hover .del-photo { display: flex; }
+
+/* LIGHTBOX */
+.lightbox { position: fixed; inset: 0; background: rgba(0,0,0,0.85); z-index: 9998; display: none; align-items: center; justify-content: center; flex-direction: column; padding: 20px; }
+.lightbox.active { display: flex; }
+.lightbox img { max-width: 90vw; max-height: 80vh; border-radius: 14px; object-fit: contain; }
+.lightbox-close { position: absolute; top: 18px; right: 20px; background: rgba(255,255,255,0.15); border: none; color: white; font-size: 1.5rem; cursor: pointer; border-radius: 50%; width: 38px; height: 38px; display: flex; align-items: center; justify-content: center; }
+.lightbox-caption { color: rgba(255,255,255,0.8); font-size: 0.85rem; margin-top: 10px; text-align: center; }
+
+/* MUSIC */
+.track-item { display: flex; align-items: flex-start; gap: 12px; padding: 14px 15px; background: rgba(255,255,255,0.85); border-radius: 15px; margin-bottom: 10px; box-shadow: 0 2px 10px var(--shadow); border: 1px solid rgba(214,51,132,0.1); }
+.track-info { flex: 1; min-width: 0; }
+.track-name { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
+.track-meta { font-size: 0.71rem; color: var(--text-muted); margin-top: 2px; }
+
+/* QUESTION */
+.question-item { background: rgba(255,255,255,0.88); border-radius: 17px; margin-bottom: 14px; padding: 17px; box-shadow: 0 3px 14px var(--shadow); border: 1px solid rgba(214,51,132,0.1); }
+.question-text { font-weight: 600; font-size: 0.93rem; color: var(--text-main); margin-bottom: 7px; }
+.question-meta { font-size: 0.73rem; color: var(--text-muted); margin-bottom: 11px; }
+.answers-list { border-top: 1px solid rgba(214,51,132,0.1); padding-top: 11px; }
+.answer-item { background: rgba(255,232,240,0.4); border-radius: 10px; padding: 9px 13px; margin-bottom: 7px; }
+.answer-author { font-size: 0.76rem; color: var(--pink-accent); font-weight: 600; }
+.answer-text { font-size: 0.85rem; color: var(--text-main); margin-top: 2px; }
+.reply-form { display: flex; gap: 7px; margin-top: 10px; flex-wrap: wrap; }
+.reply-input { flex: 1; min-width: 120px; padding: 8px 13px; border-radius: var(--radius-btn); border: 1.5px solid rgba(214,51,132,0.2); outline: none; font-family: 'Quicksand', sans-serif; font-size: 0.84rem; background: rgba(255,255,255,0.9); }
+.reply-input:focus { border-color: var(--pink-accent); }
+
+/* MEMORY */
+.memory-item { display: flex; gap: 14px; background: rgba(255,255,255,0.88); border-radius: 17px; padding: 16px; margin-bottom: 14px; box-shadow: 0 3px 14px var(--shadow); border: 1px solid rgba(214,51,132,0.1); }
+.memory-img { width: 85px; height: 85px; border-radius: 11px; object-fit: cover; flex-shrink: 0; cursor: pointer; }
+.memory-img-ph { width: 85px; height: 85px; border-radius: 11px; background: var(--pink-pale); display: flex; align-items: center; justify-content: center; font-size: 1.8rem; flex-shrink: 0; }
+.memory-info { flex: 1; min-width: 0; }
+.memory-edate { font-family: 'Dancing Script', cursive; font-size: 1rem; color: var(--pink-accent); }
+.memory-desc { font-size: 0.86rem; line-height: 1.6; color: var(--text-main); margin: 5px 0; }
+.memory-ago { font-size: 0.7rem; color: var(--text-muted); }
+
+/* CALENDAR */
+.cal-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+.cal-month { font-family: 'Dancing Script', cursive; font-size: 1.2rem; color: var(--pink-accent); }
+.cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 3px; }
+.cal-dlabel { text-align: center; font-size: 0.68rem; color: var(--text-muted); padding: 3px 0; font-weight: 600; }
+.cal-day { text-align: center; padding: 5px 2px; border-radius: 7px; font-size: 0.82rem; cursor: pointer; transition: all 0.15s; min-height: 30px; display: flex; flex-direction: column; align-items: center; gap: 2px; }
+.cal-day:hover { background: var(--pink-pale); }
+.cal-day.today { background: var(--pink-accent); color: white; font-weight: 700; border-radius: 50%; }
+.cal-day.has-event::after { content: ''; width: 4px; height: 4px; background: var(--pink-accent); border-radius: 50%; display: block; }
+.cal-day.today.has-event::after { background: white; }
+.cal-day.other-month { color: rgba(90,90,90,0.3); cursor: default; }
+.event-item { background: rgba(255,255,255,0.88); border-radius: 13px; padding: 13px 15px; margin-bottom: 9px; box-shadow: 0 2px 10px var(--shadow); border-left: 3px solid var(--pink-accent); }
+.event-name { font-weight: 600; font-size: 0.88rem; color: var(--text-main); }
+.event-date { font-size: 0.74rem; color: var(--pink-accent); margin-top: 2px; }
+.event-desc { font-size: 0.8rem; color: var(--text-muted); margin-top: 3px; }
+
+/* MOVIE */
+.movie-item { background: rgba(255,255,255,0.88); border-radius: 15px; padding: 15px; margin-bottom: 11px; box-shadow: 0 2px 10px var(--shadow); border: 1px solid rgba(214,51,132,0.1); display: flex; gap: 12px; align-items: flex-start; }
+.movie-icon { font-size: 1.7rem; flex-shrink: 0; }
+.movie-info { flex: 1; min-width: 0; }
+.movie-title { font-weight: 600; font-size: 0.9rem; color: var(--text-main); }
+.movie-type { font-size: 0.7rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.4px; }
+.movie-status { display: inline-block; font-size: 0.7rem; padding: 2px 9px; border-radius: var(--radius-btn); margin-top: 4px; }
+.s-want { background: #fff0f5; color: var(--pink-accent); border: 1px solid rgba(214,51,132,0.2); }
+.s-watching { background: #fff8e1; color: #c69500; border: 1px solid rgba(198,149,0,0.2); }
+.s-done { background: #e8f5e9; color: #2e7d32; border: 1px solid rgba(46,125,50,0.2); }
+.movie-rating { color: #f4c430; font-size: 0.86rem; }
+.movie-note { font-size: 0.78rem; color: var(--text-muted); margin-top: 3px; font-style: italic; }
+.star-rate { display: inline-flex; gap: 3px; cursor: pointer; }
+.star-rate span { font-size: 1.1rem; color: #ddd; transition: color 0.1s; }
+.star-rate span.on { color: #f4c430; }
+
+/* FOOTER */
+.site-footer {
+  position: fixed; bottom: 0; left: 0; right: 0;
+  text-align: center; padding: 9px 20px;
+  background: rgba(255,255,255,0.72); backdrop-filter: blur(10px);
+  border-top: 1px solid rgba(214,51,132,0.1);
+  font-family: 'Dancing Script', cursive; font-size: 1rem; color: var(--pink-accent); z-index: 100;
+}
+
+/* MISC */
+.back-btn { display: flex; align-items: center; gap: 5px; background: transparent; border: none; color: var(--pink-accent); cursor: pointer; font-family: 'Quicksand', sans-serif; font-size: 0.86rem; font-weight: 600; padding: 0; margin-bottom: 14px; }
+.back-btn:hover { color: #c02775; }
+.loading { text-align: center; color: var(--text-muted); font-size: 0.83rem; padding: 22px; }
+.empty-state { text-align: center; color: var(--text-muted); padding: 28px; font-size: 0.86rem; }
+.empty-state .ei { font-size: 2.2rem; margin-bottom: 8px; }
+.event-banner { background: linear-gradient(135deg,rgba(214,51,132,0.08),rgba(255,192,203,0.15)); border: 1px solid rgba(214,51,132,0.18); border-radius: 13px; padding: 11px 15px; margin-bottom: 12px; font-size: 0.84rem; color: var(--pink-accent); text-align: center; font-weight: 600; }
+.img-size-note { font-size: 0.72rem; color: var(--text-muted); margin-top: 4px; }
+.compress-progress { font-size: 0.8rem; color: var(--pink-accent); margin-top: 6px; display: none; }
+
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-thumb { background: rgba(214,51,132,0.22); border-radius: 3px; }
+
+@media (max-width: 480px) {
+  .lock-card { padding: 26px 18px; }
+  .site-header h1 { font-size: 1.7rem; }
+  .counter-grid { gap: 5px; }
+  .counter-num { font-size: 1.3rem; }
+  .nav-grid { grid-template-columns: 1fr 1fr; }
+  .memory-item { flex-direction: column; }
+  .memory-img, .memory-img-ph { width: 100%; height: 150px; }
+}
+</style>
+</head>
+<body>
+
+<div class="hearts-bg" id="hearts-bg"></div>
+
+<div class="lightbox" id="lightbox" onclick="closeLightboxOuter(event)">
+  <button class="lightbox-close" onclick="closeLightbox()">✕</button>
+  <img id="lightbox-img" src="" alt="">
+  <div class="lightbox-caption" id="lightbox-cap"></div>
+</div>
+
+<!-- LOCK -->
+<div id="lock-screen">
+  <div class="lock-card">
+    <div style="font-size:2.8rem;margin-bottom:8px;">💕</div>
+    <h1>Our Little World</h1>
+    <p>Enter the password to open your space ✨</p>
+    <input type="password" class="lock-input" id="pass-input" placeholder="••••••••" autocomplete="off">
+    <button class="lock-btn" onclick="checkPassword()">Enter ❤️</button>
+    <div class="lock-error" id="lock-error">Wrong password 💔</div>
+  </div>
+</div>
+
+<!-- APP -->
+<div id="app">
+  <header class="site-header">
+    <h1>Welcome my love, enjoy your stay ❤️</h1>
+    <div class="subtitle">❤️ Together since January 30, 2026</div>
+  </header>
+
+  <div style="padding:0 16px;max-width:700px;margin:0 auto;">
+    <div class="counter-card">
+      <div class="counter-label">💕 Our time together</div>
+      <div class="counter-grid">
+        <div class="counter-item"><div class="counter-num" id="cy">0</div><div class="counter-unit">Years</div></div>
+        <div class="counter-dot">·</div>
+        <div class="counter-item"><div class="counter-num" id="cmo">0</div><div class="counter-unit">Months</div></div>
+        <div class="counter-dot">·</div>
+        <div class="counter-item"><div class="counter-num" id="cd">0</div><div class="counter-unit">Days</div></div>
+        <div class="counter-dot">·</div>
+        <div class="counter-item"><div class="counter-num" id="ch">0</div><div class="counter-unit">Hours</div></div>
+        <div class="counter-dot">·</div>
+        <div class="counter-item"><div class="counter-num" id="cm">0</div><div class="counter-unit">Min</div></div>
+        <div class="counter-dot">·</div>
+        <div class="counter-item"><div class="counter-num" id="cs">0</div><div class="counter-unit">Sec</div></div>
+      </div>
+    </div>
+    <div id="event-banner-top"></div>
+  </div>
+
+  <div class="nav-section">
+    <div class="nav-grid">
+      <button class="nav-btn active" onclick="showSection('home')">🏠 Home</button>
+      <button class="nav-btn" onclick="showSection('letters')">💌 Love Letter</button>
+      <button class="nav-btn" onclick="showSection('music')">🎵 Music</button>
+      <button class="nav-btn" onclick="showSection('notes')">📝 Notes</button>
+      <button class="nav-btn" onclick="showSection('gallery')">🖼 Gallery</button>
+      <button class="nav-btn" onclick="showSection('questions')">❓ Questions</button>
+      <button class="nav-btn" onclick="showSection('memories')">📸 Memories</button>
+      <button class="nav-btn" onclick="showSection('calendar')">📅 Calendar</button>
+      <button class="nav-btn" onclick="showSection('movies')">🎬 Movies</button>
+    </div>
+  </div>
+
+  <!-- HOME -->
+  <div id="home-panel" class="section-panel active">
+    <div class="quick-cards">
+      <div class="qcard" onclick="showSection('letters')">
+        <div class="qcard-title">💌 Last Letter</div>
+        <div class="qcard-content" id="qc-letter">Loading...</div>
+        <div class="qcard-meta" id="qc-letter-meta"></div>
+      </div>
+      <div class="qcard" onclick="showSection('notes')">
+        <div class="qcard-title">📝 Last Note</div>
+        <div class="qcard-content" id="qc-note">Loading...</div>
+        <div class="qcard-meta" id="qc-note-meta"></div>
+      </div>
+      <div class="qcard" onclick="showSection('music')">
+        <div class="qcard-title">🎵 Last Track</div>
+        <div class="qcard-content" id="qc-music">No tracks yet</div>
+        <div class="qcard-meta" id="qc-music-meta"></div>
+      </div>
+      <div class="qcard" onclick="showSection('memories')">
+        <div class="qcard-title">📸 Last Memory</div>
+        <div class="qcard-content" id="qc-memory">Loading...</div>
+        <div class="qcard-meta" id="qc-memory-meta"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LETTERS -->
+  <div id="letters-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">💌 Love Letters</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="lw1" onclick="setWho('l',1)">💕 Partner 1</button>
+        <button class="who-btn" id="lw2" onclick="setWho('l',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Your letter</label>
+        <textarea class="form-textarea" id="letter-text" placeholder="My love, today I want to tell you..." style="min-height:110px;"></textarea>
+      </div>
+      <button class="btn-primary" onclick="addLetter()">Send Letter 💌</button>
+    </div>
+    <div id="letters-list"><div class="loading">💕</div></div>
+  </div>
+
+  <!-- MUSIC -->
+  <div id="music-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">🎵 Our Music</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="mw1" onclick="setWho('m',1)">💕 Partner 1</button>
+        <button class="who-btn" id="mw2" onclick="setWho('m',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Track name</label>
+        <input type="text" class="form-input" id="track-name" placeholder="Song – Artist">
+      </div>
+      <div class="tabs" id="music-tabs">
+        <button class="tab-btn active" onclick="switchMTab('file')">Upload file</button>
+        <button class="tab-btn" onclick="switchMTab('url')">Paste link</button>
+      </div>
+      <div id="mtab-file">
+        <div class="form-group">
+          <label class="form-label">Audio file (mp3, ogg, wav)</label>
+          <input type="file" id="music-file" accept="audio/*" class="form-input" style="padding:6px;">
+          <div class="img-size-note">⚠️ File will be stored as base64 in Firestore. Keep files under 700 KB. Firestore free limit: 1 GB.</div>
+        </div>
+      </div>
+      <div id="mtab-url" style="display:none;">
+        <div class="form-group">
+          <label class="form-label">Direct audio link (.mp3, .ogg)</label>
+          <input type="url" class="form-input" id="music-url" placeholder="https://example.com/song.mp3">
+          <div class="img-size-note">Paste a direct link to an audio file. YouTube links won't play in browser directly.</div>
+        </div>
+      </div>
+      <button class="btn-primary" onclick="addTrack()">Add Track 🎵</button>
+      <div class="compress-progress" id="music-progress">Saving...</div>
+    </div>
+    <div id="music-list"><div class="loading">💕</div></div>
+  </div>
+
+  <!-- NOTES -->
+  <div id="notes-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">📝 Notes</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="nw1" onclick="setWho('n',1)">💕 Partner 1</button>
+        <button class="who-btn" id="nw2" onclick="setWho('n',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Note</label>
+        <textarea class="form-textarea" id="note-text" placeholder="Write something..."></textarea>
+      </div>
+      <button class="btn-primary" onclick="addNote()">Save 📝</button>
+    </div>
+    <div id="notes-list"><div class="loading">💕</div></div>
+  </div>
+
+  <!-- GALLERY -->
+  <div id="gallery-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">🖼 Our Gallery</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="gw1" onclick="setWho('g',1)">💕 Partner 1</button>
+        <button class="who-btn" id="gw2" onclick="setWho('g',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photo (from camera or files)</label>
+        <input type="file" id="gallery-file" accept="image/*" capture="environment" class="form-input" style="padding:6px;">
+        <div class="img-size-note">Photo is compressed automatically to ~300 KB before saving.</div>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Caption (optional)</label>
+        <input type="text" class="form-input" id="gallery-caption" placeholder="Our moment...">
+      </div>
+      <button class="btn-primary" onclick="uploadPhoto()">Upload Photo 📷</button>
+      <div class="compress-progress" id="gallery-progress">Compressing and saving...</div>
+    </div>
+    <div class="gallery-grid" id="gallery-grid"></div>
+    <div id="gallery-empty" style="display:none;" class="empty-state"><div class="ei">📷</div>No photos yet!</div>
+  </div>
+
+  <!-- QUESTIONS -->
+  <div id="questions-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">❓ Questions</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="qw1" onclick="setWho('q',1)">💕 Partner 1</button>
+        <button class="who-btn" id="qw2" onclick="setWho('q',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Topic</label>
+        <input type="text" class="form-input" id="q-topic" placeholder="Dreams, future, memories...">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Question</label>
+        <textarea class="form-textarea" id="q-text" placeholder="Ask anything..."></textarea>
+      </div>
+      <button class="btn-primary" onclick="addQuestion()">Ask ❓</button>
+    </div>
+    <div id="questions-list"><div class="loading">💕</div></div>
+  </div>
+
+  <!-- MEMORIES -->
+  <div id="memories-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">📸 Memories</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="memw1" onclick="setWho('mem',1)">💕 Partner 1</button>
+        <button class="who-btn" id="memw2" onclick="setWho('mem',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Event date</label>
+        <input type="date" class="form-input" id="mem-date">
+      </div>
+      <div class="form-group">
+        <label class="form-label">Description</label>
+        <textarea class="form-textarea" id="mem-desc" placeholder="Tell about this moment..."></textarea>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Photo (optional, will be compressed)</label>
+        <input type="file" id="mem-photo" accept="image/*" class="form-input" style="padding:6px;">
+      </div>
+      <button class="btn-primary" onclick="addMemory()">Save Memory 📸</button>
+      <div class="compress-progress" id="mem-progress">Saving...</div>
+    </div>
+    <div id="memories-list"><div class="loading">💕</div></div>
+  </div>
+
+  <!-- CALENDAR -->
+  <div id="calendar-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">📅 Calendar</div>
+    <div class="card">
+      <div class="cal-header">
+        <button class="btn-secondary btn-sm" onclick="changeMonth(-1)">← Prev</button>
+        <div class="cal-month" id="cal-month-lbl">Month</div>
+        <button class="btn-secondary btn-sm" onclick="changeMonth(1)">Next →</button>
+      </div>
+      <div class="cal-grid" id="cal-grid"></div>
+    </div>
+    <div class="card">
+      <div style="font-weight:600;font-size:0.88rem;color:var(--text-main);margin-bottom:11px;">➕ Add Event</div>
+      <div class="form-group"><label class="form-label">Name</label><input type="text" class="form-input" id="ev-name" placeholder="Anniversary, birthday..."></div>
+      <div class="form-group"><label class="form-label">Date</label><input type="date" class="form-input" id="ev-date"></div>
+      <div class="form-group"><label class="form-label">Time</label><input type="time" class="form-input" id="ev-time"></div>
+      <div class="form-group">
+        <label class="form-label">Category</label>
+        <select class="form-select form-input" id="ev-cat">
+          <option value="anniversary">💕 Anniversary</option>
+          <option value="birthday">🎂 Birthday</option>
+          <option value="reminder">🔔 Reminder</option>
+          <option value="plans">🎉 Plans</option>
+          <option value="other">📌 Other</option>
+        </select>
+      </div>
+      <div class="form-group"><label class="form-label">Description</label><input type="text" class="form-input" id="ev-desc" placeholder="Details..."></div>
+      <button class="btn-primary" onclick="addEvent()">Add Event 📅</button>
+    </div>
+    <div style="font-family:'Dancing Script',cursive;font-size:1.3rem;color:var(--pink-accent);margin-bottom:11px;">Upcoming Events</div>
+    <div id="events-list"><div class="loading">💕</div></div>
+  </div>
+
+  <!-- MOVIES -->
+  <div id="movies-panel" class="section-panel">
+    <button class="back-btn" onclick="showSection('home')">← Back</button>
+    <div class="panel-title">🎬 Movies & Series</div>
+    <div class="card">
+      <div class="who-toggle">
+        <button class="who-btn active" id="movw1" onclick="setWho('mov',1)">💕 Partner 1</button>
+        <button class="who-btn" id="movw2" onclick="setWho('mov',2)">💖 Partner 2</button>
+      </div>
+      <div class="form-group"><label class="form-label">Title</label><input type="text" class="form-input" id="mov-title" placeholder="Movie or series name"></div>
+      <div class="form-group">
+        <label class="form-label">Type</label>
+        <select class="form-select form-input" id="mov-type"><option value="movie">🎬 Movie</option><option value="series">📺 Series</option></select>
+      </div>
+      <div class="form-group">
+        <label class="form-label">Status</label>
+        <select class="form-select form-input" id="mov-status"><option value="want">Want to watch</option><option value="watching">Watching now</option><option value="done">Finished</option></select>
+      </div>
+      <div class="form-group"><label class="form-label">Note</label><input type="text" class="form-input" id="mov-note" placeholder="Comment..."></div>
+      <button class="btn-primary" onclick="addMovie()">Add 🎬</button>
+    </div>
+    <div class="tabs">
+      <button class="tab-btn active" onclick="filterMovies('all')">All</button>
+      <button class="tab-btn" onclick="filterMovies('want')">Want</button>
+      <button class="tab-btn" onclick="filterMovies('watching')">Watching</button>
+      <button class="tab-btn" onclick="filterMovies('done')">Done ✓</button>
+    </div>
+    <div id="movies-list"><div class="loading">💕</div></div>
+  </div>
+
+  <div class="site-footer">💕 Our Little World — Always together ❤️</div>
+</div>
+
+<script>
+/* GitHub Pages frontend + backend config */
+window.API_BASE = localStorage.getItem('ow_api_base') || 'https://YOUR-BACKEND-URL';
+</script>
+
+<script>
+// ── CONFIG ──────────────────────────────────────────────
+const PASSWORD = 'Family143';
+const START_DATE = new Date('2026-01-30T00:00:00');
+// Change partner names here:
+const P = ['💕 Partner 1', '💖 Partner 2'];
+
+// ── STATE ────────────────────────────────────────────────
+const who = { l:1, m:1, n:1, g:1, q:1, mem:1, mov:1 };
+let calY, calM, allEvents = [], allMovies = [], movFilter = 'all';
+
+// ── HEARTS ───────────────────────────────────────────────
+(function(){
+  const c = document.getElementById('hearts-bg');
+  ['❤️','💕','💗','💖','🌸','✨'].forEach((h,i)=>{
+    for(let j=0;j<3;j++){
+      const d=document.createElement('div');
+      d.className='heart-float';
+      d.textContent=h;
+      d.style.cssText=`left:${Math.random()*100}vw;font-size:${12+Math.random()*16}px;animation-duration:${9+Math.random()*13}s;animation-delay:${-Math.random()*13}s`;
+      c.appendChild(d);
+    }
+  });
+})();
+
+// ── PASSWORD ─────────────────────────────────────────────
+function checkPassword(){
+  const v=document.getElementById('pass-input').value;
+  if(v===PASSWORD){ localStorage.setItem('ow_auth','1'); enterApp(); }
+  else{
+    const e=document.getElementById('lock-error');
+    e.style.display='block';
+    document.getElementById('pass-input').value='';
+    setTimeout(()=>e.style.display='none',2500);
+  }
+}
+document.getElementById('pass-input').addEventListener('keydown',e=>{ if(e.key==='Enter') checkPassword(); });
+window.checkPassword=checkPassword;
+
+function enterApp(){
+  document.getElementById('lock-screen').style.display='none';
+  document.getElementById('app').style.display='block';
+  startCounter();
+  initBackend().catch(err=>{ console.error(err); alert('Backend connection failed. Check API_BASE.'); });
+}
+if(localStorage.getItem('ow_auth')==='1') enterApp();
+
+// ── COUNTER ──────────────────────────────────────────────
+function startCounter(){
+  function tick(){
+    const diff=Date.now()-START_DATE;
+    const ts=Math.floor(diff/1000), s=ts%60;
+    const tm=Math.floor(ts/60), mi=tm%60;
+    const th=Math.floor(tm/60), h=th%24;
+    const td=Math.floor(th/24);
+    const y=Math.floor(td/365), mo=Math.floor((td%365)/30), d=td%30;
+    document.getElementById('cy').textContent=y;
+    document.getElementById('cmo').textContent=mo;
+    document.getElementById('cd').textContent=d;
+    document.getElementById('ch').textContent=h;
+    document.getElementById('cm').textContent=mi;
+    document.getElementById('cs').textContent=s;
+  }
+  tick(); setInterval(tick,1000);
+}
+
+// ── NAV ──────────────────────────────────────────────────
+function showSection(id){
+  document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  document.getElementById(id+'-panel').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{ if((b.getAttribute('onclick')||'').includes("'"+id+"'")) b.classList.add('active'); });
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+window.showSection=showSection;
+
+// ── WHO ──────────────────────────────────────────────────
+function setWho(section,n){
+  who[section]=n;
+  document.getElementById(section+'w1').classList.toggle('active',n===1);
+  document.getElementById(section+'w2').classList.toggle('active',n===2);
+}
+window.setWho=setWho;
+
+// ── HELPERS ──────────────────────────────────────────────
+function fmtDate(ts){
+  if(!ts) return '';
+  const d=ts.toDate?ts.toDate():new Date(ts);
+  return d.toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
+}
+function timeAgo(ts){
+  if(!ts) return '';
+  const d=ts.toDate?ts.toDate():new Date(ts);
+  const diff=Date.now()-d.getTime(), days=Math.floor(diff/86400000);
+  if(days<1) return 'Today'; if(days===1) return 'Yesterday';
+  if(days<30) return days+' days ago';
+  if(days<365) return Math.floor(days/30)+' months ago';
+  return Math.floor(days/365)+' years ago';
+}
+function daysUntil(dateStr){
+  const d=new Date(dateStr), now=new Date();
+  now.setHours(0,0,0,0); d.setHours(0,0,0,0);
+  return Math.ceil((d-now)/86400000);
+}
+function esc(s){ return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function pn(n){ return P[n-1]||'Partner '+n; }
+
+// ── IMAGE COMPRESS ────────────────────────────────────────
+function compressImage(file, maxW=900, quality=0.72){
+  return new Promise(resolve=>{
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
+        canvas.getContext('2d').drawImage(img,0,0,w,h);
+        resolve(canvas.toDataURL('image/jpeg',quality));
+      };
+      img.src=e.target.result;
+    };
+    reader.readAsDataURL(file);
+  });
+}
+
+// ── FIREBASE INIT ─────────────────────────────────────────
+let store = { letters: [], notes: [], music: [], gallery: [], questions: [], memories: [], events: [], movies: [] };
+
+async function apiRequest(path, options = {}) {
+  const url = `${window.API_BASE}${path}`;
+  const fetchOptions = {
+    ...options,
+    headers: {
+      'Content-Type': 'application/json',
+      ...(options.headers || {})
+    }
+  };
+  const res = await fetch(url, fetchOptions);
+  const text = await res.text();
+  if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
+  return text ? JSON.parse(text) : null;
+}
+
+async function loadBackendData(){
+  const data = await apiRequest('/data');
+  store = data || store;
+  allEvents = store.events || [];
+  allMovies = store.movies || [];
+  renderLetters(store.letters || []);
+  renderNotes(store.notes || []);
+  renderMusic(store.music || []);
+  renderGallery(store.gallery || []);
+  renderQuestions(store.questions || []);
+  renderMemories(store.memories || []);
+  renderEvents();
+  renderBanner();
+  renderMovies();
+}
+
+function initBackend(){
+  const now = new Date(); calY = now.getFullYear(); calM = now.getMonth();
+  renderCalendar();
+  return loadBackendData();
+}
+
+// ── LETTERS ──────────────────────────────────────────────
+
+async function addLetter(){
+  const t=document.getElementById('letter-text').value.trim();
+  if(!t) return;
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({ collection: 'letters', item: { text: t, who: who.l } })
+  });
+  document.getElementById('letter-text').value='';
+  await loadBackendData();
+}
+window.addLetter=addLetter;
+
+function renderLetters(items){
+  const el=document.getElementById('letters-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">💌</div>No letters yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
+    <div class="letter-item">
+      <div class="letter-author">${pn(i.who)}</div>
+      <div class="letter-date">${fmtDate(i.createdAt)}</div>
+      <div class="letter-text">${esc(i.text)}</div>
+      <div style="text-align:right;margin-top:9px;"><button class="btn-danger" onclick="delDoc('letters','${i.id}')">Delete</button></div>
+    </div>`).join('');
+}
+
+// ── MUSIC ─────────────────────────────────────────────────
+
+function switchMTab(t){
+  document.getElementById('mtab-file').style.display=t==='file'?'':'none';
+  document.getElementById('mtab-url').style.display=t==='url'?'':'none';
+  document.querySelectorAll('#music-tabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',(t==='file'&&i===0)||(t==='url'&&i===1)));
+}
+window.switchMTab=switchMTab;
+
+
+async function addTrack(){
+  const name=document.getElementById('track-name').value.trim();
+  if(!name){alert('Enter track name');return;}
+  const fileInput=document.getElementById('music-file');
+  const urlVal=document.getElementById('music-url').value.trim();
+  let fileData='', url='';
+  const prog=document.getElementById('music-progress');
+
+  if(document.getElementById('mtab-file').style.display!=='none' && fileInput.files[0]){
+    const file=fileInput.files[0];
+    if(file.size>1500000){alert('File too large. Max ~1.5 MB. Compress or use a link.');return;}
+    prog.style.display='block'; prog.textContent='Reading file...';
+    fileData=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
+    prog.textContent='Saving...';
+  } else if(urlVal){
+    url=urlVal;
+  } else {
+    alert('Upload a file or paste a link');return;
+  }
+
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({ collection: 'music', item: { name, who: who.m, fileData, url } })
+  });
+
+  document.getElementById('track-name').value='';
+  fileInput.value=''; document.getElementById('music-url').value='';
+  prog.style.display='none';
+  await loadBackendData();
+}
+window.addTrack=addTrack;
+
+function renderMusic(items){
+  const el=document.getElementById('music-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">🎵</div>No tracks yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
+    <div class="track-item">
+      <div class="track-info">
+        <div class="track-name">🎵 ${esc(i.name)}</div>
+        <div class="track-meta">${pn(i.who)} · ${timeAgo(i.createdAt)}</div>
+        ${i.fileData?`<audio controls src="${i.fileData}" style="width:100%;margin-top:7px;"></audio>`:''}
+        ${i.url&&!i.fileData?`<audio controls src="${esc(i.url)}" style="width:100%;margin-top:7px;"></audio>`:''}
+      </div>
+      <button class="btn-danger" onclick="delDoc('music','${i.id}')">✕</button>
+    </div>`).join('');
+}
+
+// ── NOTES ─────────────────────────────────────────────────
+
+async function addNote(){
+  const t=document.getElementById('note-text').value.trim();
+  if(!t) return;
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({ collection: 'notes', item: { text: t, who: who.n } })
+  });
+  document.getElementById('note-text').value='';
+  await loadBackendData();
+}
+window.addNote=addNote;
+
+function renderNotes(items){
+  const el=document.getElementById('notes-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">📝</div>No notes yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
+    <div class="note-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;">
+        <div><span class="note-author">${pn(i.who)}</span> <span class="note-date">· ${fmtDate(i.createdAt)}</span></div>
+        <div style="display:flex;gap:5px;">
+          <button class="btn-secondary btn-sm" onclick="startEditNote('${i.id}',this)">Edit</button>
+          <button class="btn-danger" onclick="delDoc('notes','${i.id}')">✕</button>
+        </div>
+      </div>
+      <div class="note-text" id="nt-${i.id}">${esc(i.text)}</div>
+    </div>`).join('');
+}
+
+
+function startEditNote(id,btn){
+  const el=document.getElementById('nt-'+id);
+  if(btn.textContent==='Edit'){
+    const old=el.textContent;
+    el.innerHTML=`<textarea class="form-textarea" id="ntedit-${id}" style="margin-top:6px;">${esc(old)}</textarea>`;
+    btn.textContent='Save';
+  } else {
+    const ta=document.getElementById('ntedit-'+id);
+    if(ta){
+      apiRequest('/item', {
+        method: 'PUT',
+        body: JSON.stringify({ collection: 'notes', id, patch: { text: ta.value } })
+      }).then(loadBackendData);
+    }
+    btn.textContent='Edit';
+  }
+}
+window.startEditNote=startEditNote;
+
+// ── GALLERY ───────────────────────────────────────────────
+
+async function uploadPhoto(){
+  const file=document.getElementById('gallery-file').files[0];
+  const caption=document.getElementById('gallery-caption').value.trim();
+  if(!file){alert('Select a photo');return;}
+  const prog=document.getElementById('gallery-progress');
+  prog.style.display='block';
+  const base64=await compressImage(file,900,0.72);
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({ collection: 'gallery', item: { base64, caption, who: who.g } })
+  });
+  document.getElementById('gallery-file').value='';
+  document.getElementById('gallery-caption').value='';
+  prog.style.display='none';
+  await loadBackendData();
+}
+window.uploadPhoto=uploadPhoto;
+
+function renderGallery(items){
+  const grid=document.getElementById('gallery-grid');
+  const empty=document.getElementById('gallery-empty');
+  if(!items.length){grid.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  grid.innerHTML=items.map(i=>`
+    <div class="gallery-item" onclick="openLightbox('${i.base64}','${esc(i.caption||'')} · ${pn(i.who)}')">
+      <img src="${i.base64}" alt="${esc(i.caption||'Photo')}" loading="lazy">
+      <button class="del-photo" onclick="event.stopPropagation();delDoc('gallery','${i.id}')">✕</button>
+    </div>`).join('');
+}
+
+function openLightbox(src,cap){
+  document.getElementById('lightbox-img').src=src;
+  document.getElementById('lightbox-cap').textContent=cap||'';
+  document.getElementById('lightbox').classList.add('active');
+}
+function closeLightbox(){ document.getElementById('lightbox').classList.remove('active'); }
+function closeLightboxOuter(e){ if(e.target===document.getElementById('lightbox')) closeLightbox(); }
+window.openLightbox=openLightbox; window.closeLightbox=closeLightbox; window.closeLightboxOuter=closeLightboxOuter;
+
+// ── QUESTIONS ─────────────────────────────────────────────
+
+async function addQuestion(){
+  const text=document.getElementById('q-text').value.trim();
+  const topic=document.getElementById('q-topic').value.trim();
+  if(!text) return;
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({ collection: 'questions', item: { text, topic, who: who.q, answers: [] } })
+  });
+  document.getElementById('q-text').value=''; document.getElementById('q-topic').value='';
+  await loadBackendData();
+}
+window.addQuestion=addQuestion;
+
+
+const rWho={};
+function setRWho(qid,n){ rWho[qid]=n; document.getElementById('rw1-'+qid)?.classList.toggle('active',n===1); document.getElementById('rw2-'+qid)?.classList.toggle('active',n===2); }
+window.setRWho=setRWho;
+
+async function addReply(qid){
+  const inp=document.getElementById('reply-'+qid);
+  const text=inp?.value.trim();
+  if(!text) return;
+  const w=rWho[qid]||1;
+  const q = (store.questions || []).find(x => x.id === qid);
+  if(!q) return;
+  const answers=[...(q.answers||[]),{text,who:w,t:Date.now()}];
+  await apiRequest('/item', {
+    method: 'PUT',
+    body: JSON.stringify({ collection: 'questions', id: qid, patch: { answers } })
+  });
+  inp.value='';
+  await loadBackendData();
+}
+window.addReply=addReply;
+
+function renderQuestions(items){
+  const el=document.getElementById('questions-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">❓</div>No questions yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
+    <div class="question-item">
+      <div class="question-meta">${pn(i.who)}${i.topic?' · <b>'+esc(i.topic)+'</b>':''} · ${timeAgo(i.createdAt)}</div>
+      <div class="question-text">${esc(i.text)}</div>
+      <div class="answers-list">
+        ${(i.answers||[]).map(a=>`<div class="answer-item"><div class="answer-author">${pn(a.who)}</div><div class="answer-text">${esc(a.text)}</div></div>`).join('')}
+        <div class="reply-form">
+          <input class="reply-input" id="reply-${i.id}" placeholder="Reply..." onkeydown="if(event.key==='Enter')addReply('${i.id}')">
+          <button class="who-btn active" id="rw1-${i.id}" onclick="setRWho('${i.id}',1)" style="flex:0;padding:6px 10px;font-size:0.74rem;">P1</button>
+          <button class="who-btn" id="rw2-${i.id}" onclick="setRWho('${i.id}',2)" style="flex:0;padding:6px 10px;font-size:0.74rem;">P2</button>
+          <button class="btn-primary btn-sm" onclick="addReply('${i.id}')">→</button>
+        </div>
+      </div>
+      <div style="text-align:right;margin-top:7px;"><button class="btn-danger" onclick="delDoc('questions','${i.id}')">Delete</button></div>
+    </div>`).join('');
+}
+
+// ── MEMORIES ─────────────────────────────────────────────
+
+async function addMemory(){
+  const desc=document.getElementById('mem-desc').value.trim();
+  const eventDate=document.getElementById('mem-date').value;
+  if(!desc||!eventDate){alert('Fill in date and description');return;}
+  const prog=document.getElementById('mem-progress');
+  prog.style.display='block';
+  let photoBase64='';
+  const file=document.getElementById('mem-photo').files[0];
+  if(file) photoBase64=await compressImage(file,800,0.7);
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({ collection: 'memories', item: { desc, eventDate, photoBase64, who: who.mem } })
+  });
+  document.getElementById('mem-desc').value=''; document.getElementById('mem-date').value=''; document.getElementById('mem-photo').value='';
+  prog.style.display='none';
+  await loadBackendData();
+}
+window.addMemory=addMemory;
+
+function renderMemories(items){
+  const el=document.getElementById('memories-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">📸</div>No memories yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
+    <div class="memory-item">
+      ${i.photoBase64
+        ?`<img class="memory-img" src="${i.photoBase64}" alt="Memory" onclick="openLightbox('${i.photoBase64}','${esc(i.desc?.slice(0,50)||'')}')">`
+        :`<div class="memory-img-ph">💕</div>`}
+      <div class="memory-info">
+        <div class="memory-edate">${i.eventDate}</div>
+        <div class="memory-desc">${esc(i.desc)}</div>
+        <div class="memory-ago">${timeAgo({toDate:()=>new Date(i.eventDate)})} · ${pn(i.who)}</div>
+        <button class="btn-danger" style="margin-top:7px;" onclick="delDoc('memories','${i.id}')">Delete</button>
+      </div>
+    </div>`).join('');
+}
+
+// ── CALENDAR ──────────────────────────────────────────────
+function changeMonth(d){ calM+=d; if(calM>11){calM=0;calY++;} if(calM<0){calM=11;calY--;} renderCalendar(); }
+window.changeMonth=changeMonth;
+
+function renderCalendar(){
+  const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
+  document.getElementById('cal-month-lbl').textContent=months[calM]+' '+calY;
+  const grid=document.getElementById('cal-grid');
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html=days.map(d=>`<div class="cal-dlabel">${d}</div>`).join('');
+  const first=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const today=new Date();
+  const evDates=new Set(allEvents.map(e=>e.date));
+  for(let i=0;i<first;i++){
+    const pd=new Date(calY,calM,-(first-i-1));
+    html+=`<div class="cal-day other-month">${pd.getDate()}</div>`;
+  }
+  for(let d=1;d<=dim;d++){
+    const ds=calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday=d===today.getDate()&&calM===today.getMonth()&&calY===today.getFullYear();
+    const hasEv=evDates.has(ds);
+    html+=`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="document.getElementById('ev-date').value='${ds}';document.getElementById('ev-name').focus();">${d}</div>`;
+  }
+  grid.innerHTML=html;
+}
+
+
+async function addEvent(){
+  const name=document.getElementById('ev-name').value.trim();
+  const date=document.getElementById('ev-date').value;
+  if(!name||!date){alert('Enter name and date');return;}
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({
+      collection: 'events',
+      item: {
+        name,
+        date,
+        time: document.getElementById('ev-time').value,
+        cat: document.getElementById('ev-cat').value,
+        desc: document.getElementById('ev-desc').value.trim()
+      }
+    })
+  });
+  ['ev-name','ev-date','ev-time','ev-desc'].forEach(id=>document.getElementById(id).value='');
+  await loadBackendData();
+}
+window.addEvent=addEvent;
+
+const catIcon={anniversary:'💕',birthday:'🎂',reminder:'🔔',plans:'🎉',other:'📌'};
+function renderEvents(){
+  const el=document.getElementById('events-list');
+  const up=allEvents.filter(e=>daysUntil(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!up.length){el.innerHTML='<div class="empty-state"><div class="ei">📅</div>No upcoming events!</div>';return;}
+  el.innerHTML=up.map(i=>{
+    const d=daysUntil(i.date);
+    return `<div class="event-item">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <div>
+          <div class="event-name">${catIcon[i.cat]||'📌'} ${esc(i.name)}</div>
+          <div class="event-date">${i.date}${i.time?' at '+i.time:''} · ${d===0?'Today! 🎉':'in '+d+' days'}</div>
+          ${i.desc?`<div class="event-desc">${esc(i.desc)}</div>`:''}
+        </div>
+        <button class="btn-danger" onclick="delDoc('events','${i.id}')">✕</button>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderBanner(){
+  const up=allEvents.filter(e=>{ const d=daysUntil(e.date); return d>=0&&d<=30; }).sort((a,b)=>a.date.localeCompare(b.date));
+  const wrap=document.getElementById('event-banner-top');
+  if(!up.length){wrap.innerHTML='';return;}
+  const ev=up[0], d=daysUntil(ev.date);
+  wrap.innerHTML=`<div class="event-banner" style="max-width:640px;margin:0 auto 16px;">${d===0?'🎉 Today: '+esc(ev.name)+'!':'⏰ '+esc(ev.name)+' in '+d+' days ❤️'}</div>`;
+}
+
+// ── MOVIES ────────────────────────────────────────────────
+
+async function addMovie(){
+  const title=document.getElementById('mov-title').value.trim();
+  if(!title){alert('Enter title');return;}
+  await apiRequest('/item', {
+    method: 'POST',
+    body: JSON.stringify({
+      collection: 'movies',
+      item: {
+        title,
+        type: document.getElementById('mov-type').value,
+        status: document.getElementById('mov-status').value,
+        note: document.getElementById('mov-note').value.trim(),
+        who: who.mov,
+        rating: 0
+      }
+    })
+  });
+  document.getElementById('mov-title').value=''; document.getElementById('mov-note').value='';
+  await loadBackendData();
+}
+window.addMovie=addMovie;
+
+
+function filterMovies(f){
+  movFilter=f;
+  document.querySelectorAll('#movies-panel .tabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',['all','want','watching','done'][i]===f));
+  renderMovies();
+}
+window.filterMovies=filterMovies;
+
+const sLabel={want:'Want to watch',watching:'Watching',done:'Finished ✓'};
+const sClass={want:'s-want',watching:'s-watching',done:'s-done'};
+function renderMovies(){
+  const el=document.getElementById('movies-list');
+  const list=movFilter==='all'?allMovies:allMovies.filter(m=>m.status===movFilter);
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="ei">🎬</div>Nothing here!</div>';return;}
+  el.innerHTML=list.map(i=>`
+    <div class="movie-item">
+      <div class="movie-icon">${i.type==='series'?'📺':'🎬'}</div>
+      <div class="movie-info">
+        <div class="movie-title">${esc(i.title)}</div>
+        <div class="movie-type">${i.type==='series'?'Series':'Movie'} · ${pn(i.who)}</div>
+        <div><span class="movie-status ${sClass[i.status]}">${sLabel[i.status]}</span></div>
+        ${i.rating?`<div class="movie-rating">${'⭐'.repeat(i.rating)}</div>`:''}
+        ${i.note?`<div class="movie-note">${esc(i.note)}</div>`:''}
+        <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center;">
+          <select onchange="updMovie('${i.id}','status',this.value)" class="form-select" style="width:auto;padding:4px 10px;font-size:0.76rem;border-radius:999px;">
+            <option value="want" ${i.status==='want'?'selected':''}>Want</option>
+            <option value="watching" ${i.status==='watching'?'selected':''}>Watching</option>
+            <option value="done" ${i.status==='done'?'selected':''}>Done</option>
+          </select>
+          <div class="star-rate" onclick="rateMovie('${i.id}',event)">
+            ${[1,2,3,4,5].map(n=>`<span class="${(i.rating||0)>=n?'on':''}" data-v="${n}">★</span>`).join('')}
+          </div>
+          <button class="btn-danger" onclick="delDoc('movies','${i.id}')">✕</button>
+        </div>
+      </div>
+    </div>`).join('');
+}
+
+
+async function updMovie(id,field,val){
+  await apiRequest('/item', {
+    method: 'PUT',
+    body: JSON.stringify({ collection: 'movies', id, patch: { [field]: val } })
+  });
+  await loadBackendData();
+}
+async function rateMovie(id,e){
+  const v=parseInt(e.target.dataset.v); if(!v) return;
+  await updMovie(id,'rating',v);
+}
+window.updMovie=updMovie; window.rateMovie=rateMovie;
+
+// ── GENERIC DELETE ────────────────────────────────────────
+
+async function delDoc(col,id){
+  if(!confirm('Delete?')) return;
+  await apiRequest('/item', {
+    method: 'DELETE',
+    body: JSON.stringify({ collection: col, id })
+  });
+  await loadBackendData();
+}
+window.delDoc=delDoc;
+</script>
+</body>
+</html>
