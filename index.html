@@ -866,7 +866,7 @@ async function addTrack(){
 
   if(document.getElementById('mtab-file').style.display!=='none' && fileInput.files[0]){
     const file=fileInput.files[0];
-    if(file.size>1500000){alert('File too large. Max ~1.5 MB for Firestore. Compress or use a link.');return;}
+    if(file.size>150000000){alert('File too large. Max ~1.5 MB for Firestore. Compress or use a link.');return;}
     prog.style.display='block'; prog.textContent='Reading file...';
     fileData=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
     prog.textContent='Saving...';
