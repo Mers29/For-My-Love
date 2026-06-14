@@ -618,15 +618,34 @@ body {
   <div class="site-footer">💕 Our Little World — Always together ❤️</div>
 </div>
 
-<script>
-/* GitHub Pages frontend + backend config */
-window.API_BASE = localStorage.getItem('ow_api_base') || 'https://githubpagesbackendvariant-i9w3vftqw-mers-projects-4ddb135a.vercel.app/api/data/';
+<!-- FIREBASE (NO STORAGE) -->
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js';
+
+// ⚠️ REPLACE WITH YOUR FIREBASE CONFIG
+const firebaseConfig = {
+  apiKey: "YOUR_API_KEY",
+  authDomain: "YOUR_PROJECT.firebaseapp.com",
+  projectId: "YOUR_PROJECT_ID",
+  storageBucket: "YOUR_PROJECT.appspot.com",
+  messagingSenderId: "YOUR_SENDER_ID",
+  appId: "YOUR_APP_ID"
+};
+
+const app = initializeApp(firebaseConfig);
+const db = getFirestore(app);
+window.db = db;
+window.fbLib = { collection, addDoc, onSnapshot, query, orderBy, deleteDoc, doc, updateDoc, serverTimestamp };
+window.firebaseReady = true;
+if (window._pendingInit) window._pendingInit();
 </script>
 
 <script>
 // ── CONFIG ──────────────────────────────────────────────
 const PASSWORD = 'Family143';
 const START_DATE = new Date('2026-01-30T00:00:00');
+// Change partner names here:
 const P = ['💕 Partner 1', '💖 Partner 2'];
 
 // ── STATE ────────────────────────────────────────────────
@@ -636,7 +655,7 @@ let calY, calM, allEvents = [], allMovies = [], movFilter = 'all';
 // ── HEARTS ───────────────────────────────────────────────
 (function(){
   const c = document.getElementById('hearts-bg');
-  ['❤️','💕','💗','💖','🌸','✨'].forEach((h)=>{
+  ['❤️','💕','💗','💖','🌸','✨'].forEach((h,i)=>{
     for(let j=0;j<3;j++){
       const d=document.createElement('div');
       d.className='heart-float';
@@ -650,10 +669,8 @@ let calY, calM, allEvents = [], allMovies = [], movFilter = 'all';
 // ── PASSWORD ─────────────────────────────────────────────
 function checkPassword(){
   const v=document.getElementById('pass-input').value;
-  if(v===PASSWORD){
-    localStorage.setItem('ow_auth','1');
-    enterApp();
-  } else {
+  if(v===PASSWORD){ localStorage.setItem('ow_auth','1'); enterApp(); }
+  else{
     const e=document.getElementById('lock-error');
     e.style.display='block';
     document.getElementById('pass-input').value='';
@@ -667,42 +684,36 @@ function enterApp(){
   document.getElementById('lock-screen').style.display='none';
   document.getElementById('app').style.display='block';
   startCounter();
-  initBackend().catch(err=>{
-    console.error(err);
-    alert('Backend connection failed. Check API_BASE.');
-  });
+  const init=()=>{ initFirebase(); };
+  if(window.firebaseReady) init(); else window._pendingInit=init;
 }
 if(localStorage.getItem('ow_auth')==='1') enterApp();
 
 // ── COUNTER ──────────────────────────────────────────────
 function startCounter(){
   function tick(){
-    const diff = Date.now() - START_DATE;
-    const ts = Math.floor(diff / 1000), s = ts % 60;
-    const tm = Math.floor(ts / 60), mi = tm % 60;
-    const th = Math.floor(tm / 60), h = th % 24;
-    const td = Math.floor(th / 24);
-    const y = Math.floor(td / 365), mo = Math.floor((td % 365) / 30), d = td % 30;
-    document.getElementById('cy').textContent = y;
-    document.getElementById('cmo').textContent = mo;
-    document.getElementById('cd').textContent = d;
-    document.getElementById('ch').textContent = h;
-    document.getElementById('cm').textContent = mi;
-    document.getElementById('cs').textContent = s;
+    const diff=Date.now()-START_DATE;
+    const ts=Math.floor(diff/1000), s=ts%60;
+    const tm=Math.floor(ts/60), mi=tm%60;
+    const th=Math.floor(tm/60), h=th%24;
+    const td=Math.floor(th/24);
+    const y=Math.floor(td/365), mo=Math.floor((td%365)/30), d=td%30;
+    document.getElementById('cy').textContent=y;
+    document.getElementById('cmo').textContent=mo;
+    document.getElementById('cd').textContent=d;
+    document.getElementById('ch').textContent=h;
+    document.getElementById('cm').textContent=mi;
+    document.getElementById('cs').textContent=s;
   }
-  tick();
-  setInterval(tick, 1000);
+  tick(); setInterval(tick,1000);
 }
 
 // ── NAV ──────────────────────────────────────────────────
 function showSection(id){
   document.querySelectorAll('.section-panel').forEach(p=>p.classList.remove('active'));
   document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
-  const panel = document.getElementById(id+'-panel');
-  if (panel) panel.classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(b=>{
-    if((b.getAttribute('onclick')||'').includes("'"+id+"'")) b.classList.add('active');
-  });
+  document.getElementById(id+'-panel').classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(b=>{ if((b.getAttribute('onclick')||'').includes("'"+id+"'")) b.classList.add('active'); });
   window.scrollTo({top:0,behavior:'smooth'});
 }
 window.showSection=showSection;
@@ -718,21 +729,20 @@ window.setWho=setWho;
 // ── HELPERS ──────────────────────────────────────────────
 function fmtDate(ts){
   if(!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
+  const d=ts.toDate?ts.toDate():new Date(ts);
   return d.toLocaleDateString('en',{day:'numeric',month:'short',year:'numeric'})+', '+d.toLocaleTimeString('en',{hour:'2-digit',minute:'2-digit'});
 }
 function timeAgo(ts){
   if(!ts) return '';
-  const d = ts.toDate ? ts.toDate() : new Date(ts);
-  const diff = Date.now() - d.getTime(), days = Math.floor(diff/86400000);
-  if(days<1) return 'Today';
-  if(days===1) return 'Yesterday';
+  const d=ts.toDate?ts.toDate():new Date(ts);
+  const diff=Date.now()-d.getTime(), days=Math.floor(diff/86400000);
+  if(days<1) return 'Today'; if(days===1) return 'Yesterday';
   if(days<30) return days+' days ago';
   if(days<365) return Math.floor(days/30)+' months ago';
   return Math.floor(days/365)+' years ago';
 }
 function daysUntil(dateStr){
-  const d = new Date(dateStr), now = new Date();
+  const d=new Date(dateStr), now=new Date();
   now.setHours(0,0,0,0); d.setHours(0,0,0,0);
   return Math.ceil((d-now)/86400000);
 }
@@ -742,161 +752,145 @@ function pn(n){ return P[n-1]||'Partner '+n; }
 // ── IMAGE COMPRESS ────────────────────────────────────────
 function compressImage(file, maxW=900, quality=0.72){
   return new Promise(resolve=>{
-    const reader = new FileReader();
-    reader.onload = e=>{
-      const img = new Image();
-      img.onload = ()=>{
-        let w = img.width, h = img.height;
-        if(w > maxW){ h = Math.round(h * maxW / w); w = maxW; }
-        const canvas = document.createElement('canvas');
-        canvas.width = w; canvas.height = h;
+    const reader=new FileReader();
+    reader.onload=e=>{
+      const img=new Image();
+      img.onload=()=>{
+        let w=img.width, h=img.height;
+        if(w>maxW){ h=Math.round(h*maxW/w); w=maxW; }
+        const canvas=document.createElement('canvas');
+        canvas.width=w; canvas.height=h;
         canvas.getContext('2d').drawImage(img,0,0,w,h);
         resolve(canvas.toDataURL('image/jpeg',quality));
       };
-      img.src = e.target.result;
+      img.src=e.target.result;
     };
     reader.readAsDataURL(file);
   });
 }
 
-// ── API ───────────────────────────────────────────────────
-let store = { letters: [], notes: [], music: [], gallery: [], questions: [], memories: [], events: [], movies: [] };
+// ── FIREBASE INIT ─────────────────────────────────────────
+function initFirebase(){
+  const {collection,query,orderBy,onSnapshot}=window.fbLib, db=window.db;
 
-async function apiRequest(options = {}) {
-  const res = await fetch(window.API_BASE, {
-    ...options,
-    headers: {
-      'Content-Type': 'application/json',
-      ...(options.headers || {})
-    }
+  onSnapshot(query(collection(db,'letters'),orderBy('createdAt','desc')),snap=>{
+    const items=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderLetters(items);
+    if(items[0]){ document.getElementById('qc-letter').textContent=(items[0].text||'').slice(0,100); document.getElementById('qc-letter-meta').textContent=pn(items[0].who)+' · '+timeAgo(items[0].createdAt); }
+    else document.getElementById('qc-letter').textContent='No letters yet';
   });
 
-  const text = await res.text();
-  if (!res.ok) throw new Error(text || `HTTP ${res.status}`);
-  return text ? JSON.parse(text) : null;
-}
+  onSnapshot(query(collection(db,'notes'),orderBy('createdAt','desc')),snap=>{
+    const items=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderNotes(items);
+    if(items[0]){ document.getElementById('qc-note').textContent=(items[0].text||'').slice(0,100); document.getElementById('qc-note-meta').textContent=pn(items[0].who)+' · '+timeAgo(items[0].createdAt); }
+    else document.getElementById('qc-note').textContent='No notes yet';
+  });
 
-async function loadBackendData(){
-  const data = await apiRequest({ method: 'GET' });
-  store = data || store;
-  allEvents = store.events || [];
-  allMovies = store.movies || [];
-  renderLetters(store.letters || []);
-  renderNotes(store.notes || []);
-  renderMusic(store.music || []);
-  renderGallery(store.gallery || []);
-  renderQuestions(store.questions || []);
-  renderMemories(store.memories || []);
-  renderEvents();
-  renderBanner();
-  renderMovies();
-  renderCalendar();
-}
+  onSnapshot(query(collection(db,'music'),orderBy('createdAt','desc')),snap=>{
+    const items=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMusic(items);
+    if(items[0]){ document.getElementById('qc-music').textContent=items[0].name||'Unknown'; document.getElementById('qc-music-meta').textContent=pn(items[0].who)+' · '+timeAgo(items[0].createdAt); }
+    else document.getElementById('qc-music').textContent='No tracks yet';
+  });
 
-function initBackend(){
-  const now = new Date();
-  calY = now.getFullYear();
-  calM = now.getMonth();
+  onSnapshot(query(collection(db,'gallery'),orderBy('createdAt','desc')),snap=>{
+    renderGallery(snap.docs.map(d=>({id:d.id,...d.data()})));
+  });
+
+  onSnapshot(query(collection(db,'questions'),orderBy('createdAt','desc')),snap=>{
+    renderQuestions(snap.docs.map(d=>({id:d.id,...d.data()})));
+  });
+
+  onSnapshot(query(collection(db,'memories'),orderBy('eventDate','desc')),snap=>{
+    const items=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMemories(items);
+    if(items[0]){ document.getElementById('qc-memory').textContent=(items[0].desc||'').slice(0,100); document.getElementById('qc-memory-meta').textContent=timeAgo({toDate:()=>new Date(items[0].eventDate)}); }
+    else document.getElementById('qc-memory').textContent='No memories yet';
+  });
+
+  onSnapshot(query(collection(db,'events'),orderBy('date','asc')),snap=>{
+    allEvents=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderEvents(); renderCalendar(); renderBanner();
+  });
+
+  onSnapshot(query(collection(db,'movies'),orderBy('createdAt','desc')),snap=>{
+    allMovies=snap.docs.map(d=>({id:d.id,...d.data()}));
+    renderMovies();
+  });
+
+  const now=new Date(); calY=now.getFullYear(); calM=now.getMonth();
   renderCalendar();
-  return loadBackendData();
 }
 
 // ── LETTERS ──────────────────────────────────────────────
 async function addLetter(){
-  const t = document.getElementById('letter-text').value.trim();
+  const t=document.getElementById('letter-text').value.trim();
   if(!t) return;
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({ collection: 'letters', item: { text: t, who: who.l } })
-  });
-  document.getElementById('letter-text').value = '';
-  await loadBackendData();
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  await addDoc(collection(window.db,'letters'),{text:t,who:who.l,createdAt:serverTimestamp()});
+  document.getElementById('letter-text').value='';
 }
-window.addLetter = addLetter;
+window.addLetter=addLetter;
 
 function renderLetters(items){
-  const el = document.getElementById('letters-list');
-  if(!items.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">💌</div>No letters yet!</div>';
-    return;
-  }
-  el.innerHTML = items.map(i=>`
+  const el=document.getElementById('letters-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">💌</div>No letters yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
     <div class="letter-item">
       <div class="letter-author">${pn(i.who)}</div>
       <div class="letter-date">${fmtDate(i.createdAt)}</div>
       <div class="letter-text">${esc(i.text)}</div>
-      <div style="text-align:right;margin-top:9px;">
-        <button class="btn-danger" onclick="delDoc('letters','${i.id}')">Delete</button>
-      </div>
+      <div style="text-align:right;margin-top:9px;"><button class="btn-danger" onclick="delDoc('letters','${i.id}')">Delete</button></div>
     </div>`).join('');
 }
 
-// ── MUSIC ────────────────────────────────────────────────
+// ── MUSIC ─────────────────────────────────────────────────
 function switchMTab(t){
-  document.getElementById('mtab-file').style.display = t==='file' ? '' : 'none';
-  document.getElementById('mtab-url').style.display = t==='url' ? '' : 'none';
-  document.querySelectorAll('#music-tabs .tab-btn').forEach((b,i)=>
-    b.classList.toggle('active', (t==='file'&&i===0) || (t==='url'&&i===1))
-  );
+  document.getElementById('mtab-file').style.display=t==='file'?'':'none';
+  document.getElementById('mtab-url').style.display=t==='url'?'':'none';
+  document.querySelectorAll('#music-tabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',(t==='file'&&i===0)||(t==='url'&&i===1)));
 }
-window.switchMTab = switchMTab;
+window.switchMTab=switchMTab;
 
 async function addTrack(){
-  const name = document.getElementById('track-name').value.trim();
-  if(!name){ alert('Enter track name'); return; }
+  const name=document.getElementById('track-name').value.trim();
+  if(!name){alert('Enter track name');return;}
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  const fileInput=document.getElementById('music-file');
+  const urlVal=document.getElementById('music-url').value.trim();
+  let fileData='', url='';
+  const prog=document.getElementById('music-progress');
 
-  const fileInput = document.getElementById('music-file');
-  const urlVal = document.getElementById('music-url').value.trim();
-  let fileData = '', url = '';
-  const prog = document.getElementById('music-progress');
-
-  if(document.getElementById('mtab-file').style.display !== 'none' && fileInput.files[0]){
-    const file = fileInput.files[0];
-    if(file.size > 1500000){
-      alert('File too large. Max ~1.5 MB. Compress or use a link.');
-      return;
-    }
-    prog.style.display = 'block';
-    prog.textContent = 'Reading file...';
-    fileData = await new Promise(res=>{
-      const r = new FileReader();
-      r.onload = e=>res(e.target.result);
-      r.readAsDataURL(file);
-    });
-    prog.textContent = 'Saving...';
+  if(document.getElementById('mtab-file').style.display!=='none' && fileInput.files[0]){
+    const file=fileInput.files[0];
+    if(file.size>1500000){alert('File too large. Max ~1.5 MB for Firestore. Compress or use a link.');return;}
+    prog.style.display='block'; prog.textContent='Reading file...';
+    fileData=await new Promise(res=>{const r=new FileReader();r.onload=e=>res(e.target.result);r.readAsDataURL(file);});
+    prog.textContent='Saving...';
   } else if(urlVal){
-    url = urlVal;
+    url=urlVal;
   } else {
-    alert('Upload a file or paste a link');
-    return;
+    alert('Upload a file or paste a link');return;
   }
 
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({ collection: 'music', item: { name, who: who.m, fileData, url } })
-  });
-
-  document.getElementById('track-name').value = '';
-  fileInput.value = '';
-  document.getElementById('music-url').value = '';
-  prog.style.display = 'none';
-  await loadBackendData();
+  await addDoc(collection(window.db,'music'),{name,who:who.m,fileData,url,createdAt:serverTimestamp()});
+  document.getElementById('track-name').value='';
+  fileInput.value=''; document.getElementById('music-url').value='';
+  prog.style.display='none';
 }
-window.addTrack = addTrack;
+window.addTrack=addTrack;
 
 function renderMusic(items){
-  const el = document.getElementById('music-list');
-  if(!items.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">🎵</div>No tracks yet!</div>';
-    return;
-  }
-  el.innerHTML = items.map(i=>`
+  const el=document.getElementById('music-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">🎵</div>No tracks yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
     <div class="track-item">
       <div class="track-info">
         <div class="track-name">🎵 ${esc(i.name)}</div>
         <div class="track-meta">${pn(i.who)} · ${timeAgo(i.createdAt)}</div>
-        ${i.fileData ? `<audio controls src="${i.fileData}" style="width:100%;margin-top:7px;"></audio>` : ''}
-        ${i.url && !i.fileData ? `<audio controls src="${esc(i.url)}" style="width:100%;margin-top:7px;"></audio>` : ''}
+        ${i.fileData?`<audio controls src="${i.fileData}" style="width:100%;margin-top:7px;"></audio>`:''}
+        ${i.url&&!i.fileData?`<audio controls src="${esc(i.url)}" style="width:100%;margin-top:7px;"></audio>`:''}
       </div>
       <button class="btn-danger" onclick="delDoc('music','${i.id}')">✕</button>
     </div>`).join('');
@@ -904,24 +898,18 @@ function renderMusic(items){
 
 // ── NOTES ─────────────────────────────────────────────────
 async function addNote(){
-  const t = document.getElementById('note-text').value.trim();
+  const t=document.getElementById('note-text').value.trim();
   if(!t) return;
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({ collection: 'notes', item: { text: t, who: who.n } })
-  });
-  document.getElementById('note-text').value = '';
-  await loadBackendData();
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  await addDoc(collection(window.db,'notes'),{text:t,who:who.n,createdAt:serverTimestamp()});
+  document.getElementById('note-text').value='';
 }
-window.addNote = addNote;
+window.addNote=addNote;
 
 function renderNotes(items){
-  const el = document.getElementById('notes-list');
-  if(!items.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">📝</div>No notes yet!</div>';
-    return;
-  }
-  el.innerHTML = items.map(i=>`
+  const el=document.getElementById('notes-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">📝</div>No notes yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
     <div class="note-item">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;flex-wrap:wrap;gap:6px;">
         <div><span class="note-author">${pn(i.who)}</span> <span class="note-date">· ${fmtDate(i.createdAt)}</span></div>
@@ -935,53 +923,41 @@ function renderNotes(items){
 }
 
 function startEditNote(id,btn){
-  const el = document.getElementById('nt-'+id);
-  if(btn.textContent === 'Edit'){
-    const old = el.textContent;
-    el.innerHTML = `<textarea class="form-textarea" id="ntedit-${id}" style="margin-top:6px;">${esc(old)}</textarea>`;
-    btn.textContent = 'Save';
+  const el=document.getElementById('nt-'+id);
+  if(btn.textContent==='Edit'){
+    const old=el.textContent;
+    el.innerHTML=`<textarea class="form-textarea" id="ntedit-${id}" style="margin-top:6px;">${esc(old)}</textarea>`;
+    btn.textContent='Save';
   } else {
-    const ta = document.getElementById('ntedit-'+id);
-    if(ta){
-      apiRequest({
-        method: 'PUT',
-        body: JSON.stringify({ collection: 'notes', id, patch: { text: ta.value } })
-      }).then(loadBackendData);
-    }
-    btn.textContent = 'Edit';
+    const ta=document.getElementById('ntedit-'+id);
+    if(ta){ const {doc,updateDoc}=window.fbLib; updateDoc(doc(window.db,'notes',id),{text:ta.value}); }
+    btn.textContent='Edit';
   }
 }
-window.startEditNote = startEditNote;
+window.startEditNote=startEditNote;
 
 // ── GALLERY ───────────────────────────────────────────────
 async function uploadPhoto(){
-  const file = document.getElementById('gallery-file').files[0];
-  const caption = document.getElementById('gallery-caption').value.trim();
-  if(!file){ alert('Select a photo'); return; }
-  const prog = document.getElementById('gallery-progress');
-  prog.style.display = 'block';
-  const base64 = await compressImage(file,900,0.72);
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({ collection: 'gallery', item: { base64, caption, who: who.g } })
-  });
-  document.getElementById('gallery-file').value = '';
-  document.getElementById('gallery-caption').value = '';
-  prog.style.display = 'none';
-  await loadBackendData();
+  const file=document.getElementById('gallery-file').files[0];
+  const caption=document.getElementById('gallery-caption').value.trim();
+  if(!file){alert('Select a photo');return;}
+  const prog=document.getElementById('gallery-progress');
+  prog.style.display='block';
+  const base64=await compressImage(file,900,0.72);
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  await addDoc(collection(window.db,'gallery'),{base64,caption,who:who.g,createdAt:serverTimestamp()});
+  document.getElementById('gallery-file').value='';
+  document.getElementById('gallery-caption').value='';
+  prog.style.display='none';
 }
-window.uploadPhoto = uploadPhoto;
+window.uploadPhoto=uploadPhoto;
 
 function renderGallery(items){
-  const grid = document.getElementById('gallery-grid');
-  const empty = document.getElementById('gallery-empty');
-  if(!items.length){
-    grid.innerHTML = '';
-    empty.style.display = '';
-    return;
-  }
-  empty.style.display = 'none';
-  grid.innerHTML = items.map(i=>`
+  const grid=document.getElementById('gallery-grid');
+  const empty=document.getElementById('gallery-empty');
+  if(!items.length){grid.innerHTML='';empty.style.display='';return;}
+  empty.style.display='none';
+  grid.innerHTML=items.map(i=>`
     <div class="gallery-item" onclick="openLightbox('${i.base64}','${esc(i.caption||'')} · ${pn(i.who)}')">
       <img src="${i.base64}" alt="${esc(i.caption||'Photo')}" loading="lazy">
       <button class="del-photo" onclick="event.stopPropagation();delDoc('gallery','${i.id}')">✕</button>
@@ -989,72 +965,54 @@ function renderGallery(items){
 }
 
 function openLightbox(src,cap){
-  document.getElementById('lightbox-img').src = src;
-  document.getElementById('lightbox-cap').textContent = cap || '';
+  document.getElementById('lightbox-img').src=src;
+  document.getElementById('lightbox-cap').textContent=cap||'';
   document.getElementById('lightbox').classList.add('active');
 }
 function closeLightbox(){ document.getElementById('lightbox').classList.remove('active'); }
 function closeLightboxOuter(e){ if(e.target===document.getElementById('lightbox')) closeLightbox(); }
-window.openLightbox = openLightbox;
-window.closeLightbox = closeLightbox;
-window.closeLightboxOuter = closeLightboxOuter;
+window.openLightbox=openLightbox; window.closeLightbox=closeLightbox; window.closeLightboxOuter=closeLightboxOuter;
 
 // ── QUESTIONS ─────────────────────────────────────────────
 async function addQuestion(){
-  const text = document.getElementById('q-text').value.trim();
-  const topic = document.getElementById('q-topic').value.trim();
+  const text=document.getElementById('q-text').value.trim();
+  const topic=document.getElementById('q-topic').value.trim();
   if(!text) return;
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({ collection: 'questions', item: { text, topic, who: who.q, answers: [] } })
-  });
-  document.getElementById('q-text').value = '';
-  document.getElementById('q-topic').value = '';
-  await loadBackendData();
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  await addDoc(collection(window.db,'questions'),{text,topic,who:who.q,answers:[],createdAt:serverTimestamp()});
+  document.getElementById('q-text').value=''; document.getElementById('q-topic').value='';
 }
-window.addQuestion = addQuestion;
+window.addQuestion=addQuestion;
 
-const rWho = {};
-function setRWho(qid,n){
-  rWho[qid] = n;
-  document.getElementById('rw1-'+qid)?.classList.toggle('active', n===1);
-  document.getElementById('rw2-'+qid)?.classList.toggle('active', n===2);
-}
-window.setRWho = setRWho;
+const rWho={};
+function setRWho(qid,n){ rWho[qid]=n; document.getElementById('rw1-'+qid)?.classList.toggle('active',n===1); document.getElementById('rw2-'+qid)?.classList.toggle('active',n===2); }
+window.setRWho=setRWho;
 
 async function addReply(qid){
-  const inp = document.getElementById('reply-'+qid);
-  const text = inp?.value.trim();
+  const inp=document.getElementById('reply-'+qid);
+  const text=inp?.value.trim();
   if(!text) return;
-  const w = rWho[qid] || 1;
-  const q = (store.questions || []).find(x => x.id === qid);
-  if(!q) return;
-  const answers = [...(q.answers||[]), { text, who:w, t:Date.now() }];
-  await apiRequest({
-    method: 'PUT',
-    body: JSON.stringify({ collection: 'questions', id: qid, patch: { answers } })
-  });
-  inp.value = '';
-  await loadBackendData();
+  const w=rWho[qid]||1;
+  const {doc,updateDoc,getDoc}=window.fbLib;
+  // we use dynamic import for getDoc since it's not in our initial fbLib
+  const {getDoc:gd}=await import('https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js');
+  const ref=doc(window.db,'questions',qid);
+  const snap=await gd(ref);
+  const answers=[...(snap.data().answers||[]),{text,who:w,t:Date.now()}];
+  await updateDoc(ref,{answers});
+  inp.value='';
 }
-window.addReply = addReply;
+window.addReply=addReply;
 
 function renderQuestions(items){
-  const el = document.getElementById('questions-list');
-  if(!items.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">❓</div>No questions yet!</div>';
-    return;
-  }
-  el.innerHTML = items.map(i=>`
+  const el=document.getElementById('questions-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">❓</div>No questions yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
     <div class="question-item">
-      <div class="question-meta">${pn(i.who)}${i.topic ? ' · <b>'+esc(i.topic)+'</b>' : ''} · ${timeAgo(i.createdAt)}</div>
+      <div class="question-meta">${pn(i.who)}${i.topic?' · <b>'+esc(i.topic)+'</b>':''} · ${timeAgo(i.createdAt)}</div>
       <div class="question-text">${esc(i.text)}</div>
       <div class="answers-list">
-        ${(i.answers||[]).map(a=>`
-          <div class="answer-item">
-            <div class="answer-author">${pn(a.who)}</div>
-            <div class="answer-text">${esc(a.text)}</div>
-          </div>`).join('')}
+        ${(i.answers||[]).map(a=>`<div class="answer-item"><div class="answer-author">${pn(a.who)}</div><div class="answer-text">${esc(a.text)}</div></div>`).join('')}
         <div class="reply-form">
           <input class="reply-input" id="reply-${i.id}" placeholder="Reply..." onkeydown="if(event.key==='Enter')addReply('${i.id}')">
           <button class="who-btn active" id="rw1-${i.id}" onclick="setRWho('${i.id}',1)" style="flex:0;padding:6px 10px;font-size:0.74rem;">P1</button>
@@ -1062,47 +1020,37 @@ function renderQuestions(items){
           <button class="btn-primary btn-sm" onclick="addReply('${i.id}')">→</button>
         </div>
       </div>
-      <div style="text-align:right;margin-top:7px;">
-        <button class="btn-danger" onclick="delDoc('questions','${i.id}')">Delete</button>
-      </div>
+      <div style="text-align:right;margin-top:7px;"><button class="btn-danger" onclick="delDoc('questions','${i.id}')">Delete</button></div>
     </div>`).join('');
 }
 
 // ── MEMORIES ─────────────────────────────────────────────
 async function addMemory(){
-  const desc = document.getElementById('mem-desc').value.trim();
-  const eventDate = document.getElementById('mem-date').value;
-  if(!desc || !eventDate){ alert('Fill in date and description'); return; }
-  const prog = document.getElementById('mem-progress');
-  prog.style.display = 'block';
-  let photoBase64 = '';
-  const file = document.getElementById('mem-photo').files[0];
-  if(file) photoBase64 = await compressImage(file,800,0.7);
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({ collection: 'memories', item: { desc, eventDate, photoBase64, who: who.mem } })
-  });
-  document.getElementById('mem-desc').value = '';
-  document.getElementById('mem-date').value = '';
-  document.getElementById('mem-photo').value = '';
-  prog.style.display = 'none';
-  await loadBackendData();
+  const desc=document.getElementById('mem-desc').value.trim();
+  const eventDate=document.getElementById('mem-date').value;
+  if(!desc||!eventDate){alert('Fill in date and description');return;}
+  const prog=document.getElementById('mem-progress');
+  prog.style.display='block';
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  let photoBase64='';
+  const file=document.getElementById('mem-photo').files[0];
+  if(file) photoBase64=await compressImage(file,800,0.7);
+  await addDoc(collection(window.db,'memories'),{desc,eventDate,photoBase64,who:who.mem,createdAt:serverTimestamp()});
+  document.getElementById('mem-desc').value=''; document.getElementById('mem-date').value=''; document.getElementById('mem-photo').value='';
+  prog.style.display='none';
 }
-window.addMemory = addMemory;
+window.addMemory=addMemory;
 
 function renderMemories(items){
-  const el = document.getElementById('memories-list');
-  if(!items.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">📸</div>No memories yet!</div>';
-    return;
-  }
-  el.innerHTML = items.map(i=>`
+  const el=document.getElementById('memories-list');
+  if(!items.length){el.innerHTML='<div class="empty-state"><div class="ei">📸</div>No memories yet!</div>';return;}
+  el.innerHTML=items.map(i=>`
     <div class="memory-item">
       ${i.photoBase64
-        ? `<img class="memory-img" src="${i.photoBase64}" alt="Memory" onclick="openLightbox('${i.photoBase64}','${esc(i.desc?.slice(0,50)||'')}')">`
-        : `<div class="memory-img-ph">💕</div>`}
+        ?`<img class="memory-img" src="${i.photoBase64}" alt="Memory" onclick="openLightbox('${i.photoBase64}','${esc(i.desc?.slice(0,50)||'')}')">`
+        :`<div class="memory-img-ph">💕</div>`}
       <div class="memory-info">
-        <div class="memory-edate">${esc(i.eventDate)}</div>
+        <div class="memory-edate">${i.eventDate}</div>
         <div class="memory-desc">${esc(i.desc)}</div>
         <div class="memory-ago">${timeAgo({toDate:()=>new Date(i.eventDate)})} · ${pn(i.who)}</div>
         <button class="btn-danger" style="margin-top:7px;" onclick="delDoc('memories','${i.id}')">Delete</button>
@@ -1111,69 +1059,54 @@ function renderMemories(items){
 }
 
 // ── CALENDAR ──────────────────────────────────────────────
-function changeMonth(d){
-  calM += d;
-  if(calM > 11){ calM = 0; calY++; }
-  if(calM < 0){ calM = 11; calY--; }
-  renderCalendar();
-}
-window.changeMonth = changeMonth;
+function changeMonth(d){ calM+=d; if(calM>11){calM=0;calY++;} if(calM<0){calM=11;calY--;} renderCalendar(); }
+window.changeMonth=changeMonth;
 
 function renderCalendar(){
   const months=['January','February','March','April','May','June','July','August','September','October','November','December'];
-  document.getElementById('cal-month-lbl').textContent = months[calM]+' '+calY;
-  const grid = document.getElementById('cal-grid');
-  const days = ['Su','Mo','Tu','We','Th','Fr','Sa'];
-  let html = days.map(d=>`<div class="cal-dlabel">${d}</div>`).join('');
-  const first = new Date(calY,calM,1).getDay();
-  const dim = new Date(calY,calM+1,0).getDate();
-  const today = new Date();
-  const evDates = new Set(allEvents.map(e=>e.date));
+  document.getElementById('cal-month-lbl').textContent=months[calM]+' '+calY;
+  const grid=document.getElementById('cal-grid');
+  const days=['Su','Mo','Tu','We','Th','Fr','Sa'];
+  let html=days.map(d=>`<div class="cal-dlabel">${d}</div>`).join('');
+  const first=new Date(calY,calM,1).getDay();
+  const dim=new Date(calY,calM+1,0).getDate();
+  const today=new Date();
+  const evDates=new Set(allEvents.map(e=>e.date));
   for(let i=0;i<first;i++){
-    const pd = new Date(calY,calM,-(first-i-1));
-    html += `<div class="cal-day other-month">${pd.getDate()}</div>`;
+    const pd=new Date(calY,calM,-(first-i-1));
+    html+=`<div class="cal-day other-month">${pd.getDate()}</div>`;
   }
-  for(let d=1; d<=dim; d++){
-    const ds = calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
-    const isToday = d===today.getDate() && calM===today.getMonth() && calY===today.getFullYear();
-    const hasEv = evDates.has(ds);
-    html += `<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="document.getElementById('ev-date').value='${ds}';document.getElementById('ev-name').focus();">${d}</div>`;
+  for(let d=1;d<=dim;d++){
+    const ds=calY+'-'+String(calM+1).padStart(2,'0')+'-'+String(d).padStart(2,'0');
+    const isToday=d===today.getDate()&&calM===today.getMonth()&&calY===today.getFullYear();
+    const hasEv=evDates.has(ds);
+    html+=`<div class="cal-day${isToday?' today':''}${hasEv?' has-event':''}" onclick="document.getElementById('ev-date').value='${ds}';document.getElementById('ev-name').focus();">${d}</div>`;
   }
-  grid.innerHTML = html;
+  grid.innerHTML=html;
 }
 
 async function addEvent(){
-  const name = document.getElementById('ev-name').value.trim();
-  const date = document.getElementById('ev-date').value;
-  if(!name || !date){ alert('Enter name and date'); return; }
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({
-      collection: 'events',
-      item: {
-        name,
-        date,
-        time: document.getElementById('ev-time').value,
-        cat: document.getElementById('ev-cat').value,
-        desc: document.getElementById('ev-desc').value.trim()
-      }
-    })
+  const name=document.getElementById('ev-name').value.trim();
+  const date=document.getElementById('ev-date').value;
+  if(!name||!date){alert('Enter name and date');return;}
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  await addDoc(collection(window.db,'events'),{
+    name,date,time:document.getElementById('ev-time').value,
+    cat:document.getElementById('ev-cat').value,
+    desc:document.getElementById('ev-desc').value.trim(),
+    createdAt:serverTimestamp()
   });
   ['ev-name','ev-date','ev-time','ev-desc'].forEach(id=>document.getElementById(id).value='');
-  await loadBackendData();
 }
-window.addEvent = addEvent;
+window.addEvent=addEvent;
 
-const catIcon = { anniversary:'💕', birthday:'🎂', reminder:'🔔', plans:'🎉', other:'📌' };
+const catIcon={anniversary:'💕',birthday:'🎂',reminder:'🔔',plans:'🎉',other:'📌'};
 function renderEvents(){
-  const el = document.getElementById('events-list');
-  const up = allEvents.filter(e=>daysUntil(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date));
-  if(!up.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">📅</div>No upcoming events!</div>';
-    return;
-  }
-  el.innerHTML = up.map(i=>{
-    const d = daysUntil(i.date);
+  const el=document.getElementById('events-list');
+  const up=allEvents.filter(e=>daysUntil(e.date)>=0).sort((a,b)=>a.date.localeCompare(b.date));
+  if(!up.length){el.innerHTML='<div class="empty-state"><div class="ei">📅</div>No upcoming events!</div>';return;}
+  el.innerHTML=up.map(i=>{
+    const d=daysUntil(i.date);
     return `<div class="event-item">
       <div style="display:flex;justify-content:space-between;align-items:flex-start;">
         <div>
@@ -1188,67 +1121,50 @@ function renderEvents(){
 }
 
 function renderBanner(){
-  const up = allEvents.filter(e=>{
-    const d = daysUntil(e.date);
-    return d>=0 && d<=30;
-  }).sort((a,b)=>a.date.localeCompare(b.date));
-  const wrap = document.getElementById('event-banner-top');
-  if(!up.length){ wrap.innerHTML=''; return; }
-  const ev = up[0], d = daysUntil(ev.date);
-  wrap.innerHTML = `<div class="event-banner" style="max-width:640px;margin:0 auto 16px;">${d===0?'🎉 Today: '+esc(ev.name)+'!':'⏰ '+esc(ev.name)+' in '+d+' days ❤️'}</div>`;
+  const up=allEvents.filter(e=>{ const d=daysUntil(e.date); return d>=0&&d<=30; }).sort((a,b)=>a.date.localeCompare(b.date));
+  const wrap=document.getElementById('event-banner-top');
+  if(!up.length){wrap.innerHTML='';return;}
+  const ev=up[0], d=daysUntil(ev.date);
+  wrap.innerHTML=`<div class="event-banner" style="max-width:640px;margin:0 auto 16px;">${d===0?'🎉 Today: '+esc(ev.name)+'!':'⏰ '+esc(ev.name)+' in '+d+' days ❤️'}</div>`;
 }
 
 // ── MOVIES ────────────────────────────────────────────────
 async function addMovie(){
-  const title = document.getElementById('mov-title').value.trim();
-  if(!title){ alert('Enter title'); return; }
-  await apiRequest({
-    method: 'POST',
-    body: JSON.stringify({
-      collection: 'movies',
-      item: {
-        title,
-        type: document.getElementById('mov-type').value,
-        status: document.getElementById('mov-status').value,
-        note: document.getElementById('mov-note').value.trim(),
-        who: who.mov,
-        rating: 0
-      }
-    })
+  const title=document.getElementById('mov-title').value.trim();
+  if(!title){alert('Enter title');return;}
+  const {collection,addDoc,serverTimestamp}=window.fbLib;
+  await addDoc(collection(window.db,'movies'),{
+    title,type:document.getElementById('mov-type').value,
+    status:document.getElementById('mov-status').value,
+    note:document.getElementById('mov-note').value.trim(),
+    who:who.mov,rating:0,createdAt:serverTimestamp()
   });
-  document.getElementById('mov-title').value = '';
-  document.getElementById('mov-note').value = '';
-  await loadBackendData();
+  document.getElementById('mov-title').value=''; document.getElementById('mov-note').value='';
 }
-window.addMovie = addMovie;
+window.addMovie=addMovie;
 
 function filterMovies(f){
-  movFilter = f;
-  document.querySelectorAll('#movies-panel .tabs .tab-btn').forEach((b,i)=>
-    b.classList.toggle('active', ['all','want','watching','done'][i] === f)
-  );
+  movFilter=f;
+  document.querySelectorAll('#movies-panel .tabs .tab-btn').forEach((b,i)=>b.classList.toggle('active',['all','want','watching','done'][i]===f));
   renderMovies();
 }
-window.filterMovies = filterMovies;
+window.filterMovies=filterMovies;
 
-const sLabel = { want:'Want to watch', watching:'Watching', done:'Finished ✓' };
-const sClass = { want:'s-want', watching:'s-watching', done:'s-done' };
+const sLabel={want:'Want to watch',watching:'Watching',done:'Finished ✓'};
+const sClass={want:'s-want',watching:'s-watching',done:'s-done'};
 function renderMovies(){
-  const el = document.getElementById('movies-list');
-  const list = movFilter==='all' ? allMovies : allMovies.filter(m=>m.status===movFilter);
-  if(!list.length){
-    el.innerHTML = '<div class="empty-state"><div class="ei">🎬</div>Nothing here!</div>';
-    return;
-  }
-  el.innerHTML = list.map(i=>`
+  const el=document.getElementById('movies-list');
+  const list=movFilter==='all'?allMovies:allMovies.filter(m=>m.status===movFilter);
+  if(!list.length){el.innerHTML='<div class="empty-state"><div class="ei">🎬</div>Nothing here!</div>';return;}
+  el.innerHTML=list.map(i=>`
     <div class="movie-item">
       <div class="movie-icon">${i.type==='series'?'📺':'🎬'}</div>
       <div class="movie-info">
         <div class="movie-title">${esc(i.title)}</div>
         <div class="movie-type">${i.type==='series'?'Series':'Movie'} · ${pn(i.who)}</div>
         <div><span class="movie-status ${sClass[i.status]}">${sLabel[i.status]}</span></div>
-        ${i.rating ? `<div class="movie-rating">${'⭐'.repeat(i.rating)}</div>` : ''}
-        ${i.note ? `<div class="movie-note">${esc(i.note)}</div>` : ''}
+        ${i.rating?`<div class="movie-rating">${'⭐'.repeat(i.rating)}</div>`:''}
+        ${i.note?`<div class="movie-note">${esc(i.note)}</div>`:''}
         <div style="display:flex;gap:6px;flex-wrap:wrap;margin-top:8px;align-items:center;">
           <select onchange="updMovie('${i.id}','status',this.value)" class="form-select" style="width:auto;padding:4px 10px;font-size:0.76rem;border-radius:999px;">
             <option value="want" ${i.status==='want'?'selected':''}>Want</option>
@@ -1265,28 +1181,23 @@ function renderMovies(){
 }
 
 async function updMovie(id,field,val){
-  await apiRequest({
-    method: 'PUT',
-    body: JSON.stringify({ collection: 'movies', id, patch: { [field]: val } })
-  });
-  await loadBackendData();
+  const {doc,updateDoc}=window.fbLib;
+  await updateDoc(doc(window.db,'movies',id),{[field]:val});
 }
 async function rateMovie(id,e){
-  const v = parseInt(e.target.dataset.v);
-  if(!v) return;
-  await updMovie(id,'rating',v);
+  const v=parseInt(e.target.dataset.v); if(!v) return;
+  updMovie(id,'rating',v);
 }
-window.updMovie = updMovie;
-window.rateMovie = rateMovie;
+window.updMovie=updMovie; window.rateMovie=rateMovie;
 
 // ── GENERIC DELETE ────────────────────────────────────────
 async function delDoc(col,id){
   if(!confirm('Delete?')) return;
-  await apiRequest({
-    method: 'DELETE',
-    body: JSON.stringify({ collection: col, id })
-  });
-  await loadBackendData();
+  const {deleteDoc,doc}=window.fbLib;
+  await deleteDoc(doc(window.db,col,id));
 }
-window.delDoc = delDoc;
+window.delDoc=delDoc;
 </script>
+</body>
+</html>
+
